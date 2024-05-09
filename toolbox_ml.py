@@ -41,13 +41,14 @@ class KNN:
 
 class LogisticRegression:
     """Logistic regression model using gradient descent to optimize the weights and bias."""
-    def __init__(self, lr=0.001, epochs=1000):
+    def __init__(self, lr=0.01, epochs=1000):
         self.lr = lr
         self.epochs = epochs
         self.weights = None
         self.bias = None
 
     def fit(self, X, y):
+        """Fit the model to the data."""
         # Initialize weights and bias
         n_samples, n_features = len(X), len(X[0])
         self.weights = np.zeros(n_features)
@@ -75,6 +76,7 @@ class LogisticRegression:
         return 1 / (1 + np.exp(-z))
 
     def _gradient_descent(self, X, y, n_samples):
+        """Optimize the weights and bias using gradient descent."""
         # Evaluate the loss
         error_array = y - self._predict(X)  # y is flattened
         # Calculate the gradients
@@ -88,10 +90,46 @@ class LogisticRegression:
         return np.sum(y_true == y_pred) / len(y_true)
 
 
+class LinearRegression:
+    def __init__(self, lr=0.01, epochs=1000):
+        self.lr = lr
+        self.epochs = epochs
+        self.weights = None
+        self.bias = None
+
+    def fit(self, X, y):
+        """Fit the model to the data."""
+        n_samples, n_features = len(X), len(X[0])
+        self.weights = np.zeros(n_features)
+        self.bias = 0
+        for _ in range(self.epochs):
+            # Gradient descent
+            self._gradient_descent(X, y, n_samples)
+        return self.weights, self.bias
+
+    def predict(self, X):
+        """Calculate the linear model for a given data point."""
+        return np.dot(X, self.weights) + self.bias
+
+    def _gradient_descent(self, X, y, n_samples):
+        """Optimize the weights and bias using gradient descent."""
+        dw, db = 0, 0
+        for i in range(n_samples):
+            dw += -(2 / n_samples) * X[i] * (y[i] - self.predict(X[i]))
+            db += -(2 / n_samples) * (y[i] - self.predict(X[i]))
+
+        self.weights -= self.lr * dw
+        self.bias -= self.lr * db
+
+    def _mse(self, y_true, y_pred):
+        """Mean squared error loss function."""
+        return np.sum((y_true - y_pred)**2) / len(y_true)
+
+
 if __name__ == '__main__':
     X = np.array([[1, 2], [2, 3], [3, 4], [4, 5], [5, 6]])
-    y = np.array([0, 0, 1, 1, 1])
+    y = np.array([0.4, 0.2, 1.6, 1.7, 1.9])
     X_test = np.array([[2, 3]])
-    lr = LogisticRegression(lr=0.001, epochs=10000)
+    lr = LinearRegression(lr=0.001, epochs=10000)
     w, b = lr.fit(X, y)
     print(lr.predict(X_test))
